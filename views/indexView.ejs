@@ -7,5 +7,19 @@
   </head>
   <body>
     <h1><%= title %></h1>
+    <% if (locals.user) {%>
+    <h2>Welcome Back <%= user.first_name %></h2>
+    <ul>
+      <li><a href="/secretMember">Secret Member Signup</a></li>
+      <li><a href="/newMessage">New Message</a></li>
+      <li><a href="/logout">Log Out</a></li>
+    </ul>
+    <%} else { %>
+    <ul>
+      <li><a href="/login">Login</a></li>
+      <li><a href="/signup">Sign Up</a></li>
+    </ul>
+    <%}%>
+    <h2>Uploaded Files</h2>
   </body>
 </html>
