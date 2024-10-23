@@ -10,7 +10,7 @@
     <h1><%= title %></h1>
     <div class="signupForm">
       <%- include("partials/errors.ejs") %>
-      <form action="/users/new" method="POST">
+      <form action="/signup/" method="POST">
         <label for="username">Username: </label>
         <input id="username" name="username" type="text" value="<%=data.username%>" required />
         <label for="password">Password: </label>
