@@ -1,6 +1,7 @@
 const auth = require("../auth");
 const { body, validationResult } = require("express-validator");
-const { getUser } = require("../db/queries");
+const { getUser, createUser } = require("../db/queries");
+const bcrypt = require("bcryptjs");
 
 const passwordLengthErr = "must be between 4 and 16 characters.";
 const validateLogin = [
@@ -13,12 +14,39 @@ const validateLogin = [
 ];
 
 const get = async (req, res) => {
-  res.render("indexView", { title: "File Uploader" });
+  res.render("indexView", { title: "File Uploader", user: await req.user });
 };
 
 const getSignup = (req, res) => {
   res.render("signupView", { title: "Signup Form", data: {} });
 };
+
+const postSignup = [
+  validateLogin,
+  async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).render("signupView", {
+        title: "Signup Form",
+        errors: errors.array(),
+        data: {
+          username: req.body.username,
+        },
+      });
+    }
+    try {
+      bcrypt.hash(req.body.password, 10, async (err, hashedPassword) => {
+        if (err) {
+          return console.log("Error encrypting password");
+        }
+        createUser(req.body.username, hashedPassword);
+        res.redirect("/");
+      });
+    } catch (err) {
+      return next(err);
+    }
+  },
+];
 
 const getLogin = (req, res) => {
   let err = req.session.messages;
@@ -39,6 +67,7 @@ const postLogin = (req, res, next) => {
 module.exports = {
   get,
   getSignup,
+  postSignup,
   getLogin,
   postLogin,
 };
