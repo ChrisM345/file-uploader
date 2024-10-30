@@ -1,6 +1,6 @@
 const auth = require("../auth");
 const { body, validationResult } = require("express-validator");
-const { getUser, createUser } = require("../db/queries");
+const { getUser, createUser, setAdmin, getFolders } = require("../db/queries");
 const bcrypt = require("bcryptjs");
 
 const passwordLengthErr = "must be between 4 and 16 characters.";
@@ -13,8 +13,10 @@ const validateLogin = [
   }),
 ];
 
+const validateSecret = [body("secret").trim().equals("verysecret").withMessage("Incorrect Secret")];
+
 const get = async (req, res) => {
-  res.render("indexView", { title: "File Uploader", user: await req.user });
+  res.render("indexView", { title: "File Uploader", user: await req.user, data: await getFolders(await req.user) });
 };
 
 const getSignup = (req, res) => {
@@ -64,10 +66,41 @@ const postLogin = (req, res, next) => {
   })(req, res, next);
 };
 
+const getAdmin = (req, res, next) => {
+  res.render("adminSignupView", { title: "Admin Signup" });
+};
+
+const postAdmin = [
+  validateSecret,
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).render("adminSignupView", {
+        title: "Admin Signup",
+        errors: errors.array(),
+      });
+    }
+    setAdmin(req.session.passport.user);
+    res.redirect("/");
+  },
+];
+
+const logout = (req, res, next) => {
+  req.logout((err) => {
+    if (err) {
+      return next(err);
+    }
+    res.redirect("/");
+  });
+};
+
 module.exports = {
   get,
   getSignup,
   postSignup,
   getLogin,
   postLogin,
+  getAdmin,
+  postAdmin,
+  logout,
 };
