@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/css/styles.css" />
+    <title><%= title %></title>
+  </head>
+  <body>
+    <h1><%= title %></h1>
+    <div class="secretForm">
+      <%- include("partials/errors.ejs") %>
+      <form action="/file/createFolder/" method="POST">
+        <label for="name">Folder Name: </label>
+        <input id="name" name="name" type="text" />
+        <button>Create Folder</button>
+      </form>
+    </div>
+  </body>
+</html>

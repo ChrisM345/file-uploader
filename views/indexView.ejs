@@ -10,9 +10,17 @@
     <% if (locals.user) {%>
     <h2>Welcome Back <%= user.username %></h2>
     <ul>
-      <li><a href="/secretMember">Secret Member Signup</a></li>
-      <li><a href="/newMessage">New Message</a></li>
+      <li><a href="/admin">Admin Access</a></li>
+      <li><a href="/file/upload">Upload File</a></li>
       <li><a href="/logout">Log Out</a></li>
+    </ul>
+
+    <h2>Uploaded Files</h2>
+    <% data.forEach((folder) => { %>
+    <p><%= folder.name %></p>
+    <%}) %>
+    <ul>
+      <li><a href="/file/createFolder">Create Folder</a></li>
     </ul>
     <%} else { %>
     <ul>
@@ -20,6 +28,5 @@
       <li><a href="/signup">Sign Up</a></li>
     </ul>
     <%}%>
-    <h2>Uploaded Files</h2>
   </body>
 </html>
