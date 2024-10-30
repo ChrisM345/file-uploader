@@ -19,6 +19,15 @@ model Users {
   password   String
   role       Role     @default(USER)
   created_at DateTime @default(now())
+  folders    Folder[]
+}
+
+model Folder {
+  id         Int      @id @default(autoincrement())
+  name       String
+  created_at DateTime @default(now())
+  user       Users    @relation(fields: [usersId], references: [id])
+  usersId    Int
   files      File[]
 }
 
@@ -27,8 +36,8 @@ model File {
   name        String
   size        Int
   uploaded_at DateTime @default(now())
-  user        Users    @relation(fields: [userId], references: [id])
-  userId      Int
+  Folder      Folder   @relation(fields: [folderId], references: [id])
+  folderId    Int
 }
 
 enum Role {
