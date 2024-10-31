@@ -66,6 +66,32 @@ async function getFolders(user) {
   }
 }
 
+async function getFolderID(folderName, userID) {
+  const folder = await prisma.Folder.findFirst({
+    where: {
+      usersId: userID,
+      name: folderName,
+    },
+  });
+  return folder.id;
+}
+
+async function uploadFile(userID, folderName, file) {
+  const folderID = await getFolderID(folderName, userID);
+  console.log(folderID);
+  const uploadFile = await prisma.file.create({
+    data: {
+      name: file,
+      size: 10,
+      Folder: {
+        connect: {
+          id: folderID,
+        },
+      },
+    },
+  });
+}
+
 module.exports = {
   getUser,
   getUserById,
@@ -73,4 +99,6 @@ module.exports = {
   setAdmin,
   createFolder,
   getFolders,
+  uploadFile,
+  getFolderID,
 };
