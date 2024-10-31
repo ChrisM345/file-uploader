@@ -16,9 +16,11 @@
     </ul>
 
     <h2>Uploaded Files</h2>
-    <% data.forEach((folder) => { %>
-    <p><%= folder.name %></p>
-    <%}) %>
+    <ul>
+      <% data.forEach((folder) => { %>
+      <li><a href="/file/<%= folder.name %>"><%= folder.name %></a></li>
+      <%}) %>
+    </ul>
     <ul>
       <li><a href="/file/createFolder">Create Folder</a></li>
     </ul>
