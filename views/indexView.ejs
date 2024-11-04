@@ -15,12 +15,14 @@
       <li><a href="/logout">Log Out</a></li>
     </ul>
 
-    <h2>Uploaded Files</h2>
-    <ul>
+    <h2>Uploaded Folders and Files</h2>
+    <div class="folderContainer">
       <% data.forEach((folder) => { %>
-      <li><a href="/file/<%= folder.name %>"><%= folder.name %></a></li>
-      <%}) %>
-    </ul>
+      <div class="folder">
+        <a href="/file/<%= folder.name %>"><img src="folderIcon.svg" /></a>
+        <%= folder.name %> <%}) %>
+      </div>
+    </div>
     <ul>
       <li><a href="/file/createFolder">Create Folder</a></li>
     </ul>
