@@ -17,5 +17,6 @@ app.use(passport.session());
 app.use(express.urlencoded({ extended: true }));
 app.use("/", indexRoute);
 app.use("/file", fileRoute);
+app.use(express.static("public"));
 
 app.listen(PORT, () => console.log(`Server is listening on port ${PORT}`));
