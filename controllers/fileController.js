@@ -1,6 +1,6 @@
 const auth = require("../auth");
 const { body, validationResult } = require("express-validator");
-const { createFolder, uploadFile } = require("../db/queries");
+const { createFolder, uploadFile, getFiles, isUnique } = require("../db/queries");
 
 const validateFolderName = [
   body("name")
@@ -8,7 +8,12 @@ const validateFolderName = [
     .notEmpty()
     .withMessage("Name cannot be empty")
     .isAlpha()
-    .withMessage("Name must only contain alphabet letters"),
+    .withMessage("Name must only contain alphabet letters")
+    .custom(async (value) => {
+      if (await isUnique(value)) {
+        throw new Error("Folder Name already exists");
+      }
+    }),
 ];
 
 const getCreateFolder = (req, res, next) => {
@@ -33,9 +38,11 @@ const postCreateFolder = [
   },
 ];
 
-const folderView = (req, res, next) => {
+const folderView = async (req, res, next) => {
   const folderName = req.params.folderName;
-  res.render("folderView", { title: folderName, folderName: folderName });
+  const userID = req.session.passport.user;
+  const files = await getFiles(folderName, userID);
+  res.render("folderView", { title: folderName, folderName: folderName, files: files });
 };
 
 const getFileUpload = (req, res, next) => {
