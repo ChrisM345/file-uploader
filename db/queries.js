@@ -76,6 +76,18 @@ async function getFolderID(folderName, userID) {
   return folder.id;
 }
 
+async function isUnique(folderName, userID) {
+  const folder = await prisma.Folder.findFirst({
+    where: {
+      usersId: userID,
+      name: folderName,
+    },
+  });
+
+  console.log(folder);
+  return folder;
+}
+
 async function uploadFile(userID, folderName, file) {
   const folderID = await getFolderID(folderName, userID);
   console.log(folderID);
@@ -92,6 +104,18 @@ async function uploadFile(userID, folderName, file) {
   });
 }
 
+async function getFiles(folderName, userID) {
+  const folderId = await getFolderID(folderName, userID);
+  const files = await prisma.file.findMany({
+    where: {
+      folderId: folderId,
+    },
+  });
+
+  console.log(files);
+  return files;
+}
+
 module.exports = {
   getUser,
   getUserById,
@@ -101,4 +125,6 @@ module.exports = {
   getFolders,
   uploadFile,
   getFolderID,
+  getFiles,
+  isUnique,
 };
