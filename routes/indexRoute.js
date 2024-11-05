@@ -13,4 +13,6 @@ router.post("/admin", controller.postAdmin);
 
 router.get("/logout", controller.logout);
 
+router.get("/errorPage", controller.getErrorPage);
+
 module.exports = router;
