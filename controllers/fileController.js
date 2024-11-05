@@ -1,6 +1,6 @@
 const auth = require("../auth");
 const { body, validationResult } = require("express-validator");
-const { createFolder, uploadFile, getFiles, isUnique } = require("../db/queries");
+const { createFolder, uploadFile, getFiles, isUnique, deleteFolder, deleteFile } = require("../db/queries");
 
 const validateFolderName = [
   body("name")
@@ -39,10 +39,14 @@ const postCreateFolder = [
 ];
 
 const folderView = async (req, res, next) => {
-  const folderName = req.params.folderName;
-  const userID = req.session.passport.user;
-  const files = await getFiles(folderName, userID);
-  res.render("folderView", { title: folderName, folderName: folderName, files: files });
+  try {
+    const folderName = req.params.folderName;
+    const userID = req.session.passport.user;
+    const files = await getFiles(folderName, userID);
+    res.render("folderView", { title: folderName, folderName: folderName, files: files });
+  } catch (err) {
+    next(err);
+  }
 };
 
 const getFileUpload = (req, res, next) => {
@@ -51,11 +55,27 @@ const getFileUpload = (req, res, next) => {
 };
 
 const postFileUpload = (req, res, next) => {
-  console.log(req.session.passport.user);
-  console.log(req.body.fileData);
-  console.log(req.params.folderName);
+  // console.log(req.session.passport.user);
+  // console.log(req.body.fileData);
+  // console.log(req.params.folderName);
   uploadFile(req.session.passport.user, req.params.folderName, req.body.fileData);
   res.redirect("../");
+};
+
+const postDeleteFolder = async (req, res, next) => {
+  const user = req.session.passport.user;
+  const folderName = req.params.folderName;
+  // console.log("Deleting Folder");
+  // console.log(user);
+  // console.log(folderName);
+  await deleteFolder(folderName, user);
+  res.redirect("/");
+};
+
+const postDeleteFile = async (req, res, next) => {
+  const fileID = parseInt(req.params.id);
+  await deleteFile(fileID);
+  res.redirect(req.get("referer"));
 };
 
 module.exports = {
@@ -64,4 +84,6 @@ module.exports = {
   postCreateFolder,
   folderView,
   postFileUpload,
+  postDeleteFolder,
+  postDeleteFile,
 };
