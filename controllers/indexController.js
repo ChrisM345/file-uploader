@@ -94,6 +94,10 @@ const logout = (req, res, next) => {
   });
 };
 
+const getErrorPage = (req, res, next) => {
+  res.render("errorView", { title: "Error Page" });
+};
+
 module.exports = {
   get,
   getSignup,
@@ -103,4 +107,5 @@ module.exports = {
   getAdmin,
   postAdmin,
   logout,
+  getErrorPage,
 };
