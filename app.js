@@ -16,7 +16,12 @@ app.use(session({ secret: "cats", resave: false, saveUninitialized: false }));
 app.use(passport.session());
 app.use(express.urlencoded({ extended: true }));
 app.use("/", indexRoute);
-app.use("/file", fileRoute);
+app.use("/folder", fileRoute);
 app.use(express.static("public"));
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.redirect("/errorPage");
+});
 
 app.listen(PORT, () => console.log(`Server is listening on port ${PORT}`));
