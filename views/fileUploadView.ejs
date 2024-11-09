@@ -10,9 +10,9 @@
     <h1><%= title %></h1>
     <div class="secretForm">
       <%- include("partials/errors.ejs") %>
-      <form action="/folder/<%= folderName %>/uploadFile/" method="POST">
+      <form action="/folder/<%= folderName %>/uploadFile/" method="POST" enctype="multipart/form-data">
         <label for="fileData">Upload File: </label>
-        <input id="fileData" name="fileData" type="text" required />
+        <input id="fileData" name="fileData" type="file" required />
         <button>Upload</button>
       </form>
     </div>
