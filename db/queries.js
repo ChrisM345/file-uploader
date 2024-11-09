@@ -86,13 +86,14 @@ async function isUnique(folderName, userID) {
   return folder;
 }
 
-async function uploadFile(userID, folderName, file) {
+async function uploadFile(userID, folderName, fileName, URL, fileSize) {
   const folderID = await getFolderID(folderName, userID);
   console.log(folderID);
   const uploadFile = await prisma.file.create({
     data: {
-      name: file,
-      size: 10,
+      name: fileName,
+      size: fileSize,
+      url: URL,
       Folder: {
         connect: {
           id: folderID,
