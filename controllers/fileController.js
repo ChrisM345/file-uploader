@@ -2,6 +2,10 @@ const auth = require("../auth");
 const { body, validationResult } = require("express-validator");
 const { createFolder, uploadFile, getFiles, isUnique, deleteFolder, deleteFile } = require("../db/queries");
 
+require("dotenv").config();
+const { createClient } = require("@supabase/supabase-js");
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_BYPASS);
+
 const validateFolderName = [
   body("name")
     .trim()
@@ -54,11 +58,20 @@ const getFileUpload = (req, res, next) => {
   res.render("fileUploadView", { title: "File Upload", data: {}, folderName: folderName });
 };
 
-const postFileUpload = (req, res, next) => {
-  // console.log(req.session.passport.user);
-  // console.log(req.body.fileData);
-  // console.log(req.params.folderName);
-  uploadFile(req.session.passport.user, req.params.folderName, req.body.fileData);
+const postFileUpload = async (req, res, next) => {
+  const userID = req.session.passport.user;
+  const folderName = req.params.folderName;
+  const fileName = req.file.originalname;
+  const fileSize = req.file.size;
+  const supabasePath = `${userID}/${folderName}/${fileName}`;
+  const URL = `${process.env.SUPABASE_FILE_URL}/${supabasePath}`;
+  const { data, error } = await supabase.storage.from(`file-upload-project`).upload(supabasePath, req.file.buffer, {
+    upsert: true,
+    contentType: req.file.mimetype,
+  });
+  if (!error) {
+    uploadFile(userID, folderName, fileName, URL, fileSize);
+  }
   res.redirect("../");
 };
 
