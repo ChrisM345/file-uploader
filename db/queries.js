@@ -141,6 +141,53 @@ async function deleteFile(fileID) {
   });
 }
 
+async function renameFolder(folderName, newFolderName, userID) {
+  const folderId = await getFolderID(folderName, userID);
+  const folder = await prisma.Folder.update({
+    where: {
+      id: folderId,
+    },
+    data: {
+      name: newFolderName,
+    },
+  });
+}
+
+async function getFileId(folderId, fileName) {
+  const fileId = await prisma.file.findFirst({
+    where: {
+      folderId: folderId,
+      name: fileName,
+    },
+  });
+
+  return fileId.id;
+}
+
+async function updateFileURLs(folderName, userID, fileName, newURL) {
+  const folderId = await getFolderID(folderName, userID);
+  const fileId = await getFileId(folderId, fileName);
+  const file = await prisma.file.update({
+    where: {
+      id: fileId,
+    },
+    data: {
+      url: newURL,
+    },
+  });
+}
+
+async function getFile(folderName, userID, fileName) {
+  const folderId = await getFolderID(folderName, userID);
+  const file = await prisma.file.findFirst({
+    where: {
+      folderId: folderId,
+      name: fileName,
+    },
+  });
+  return file;
+}
+
 module.exports = {
   getUser,
   getUserById,
@@ -154,4 +201,7 @@ module.exports = {
   isUnique,
   deleteFolder,
   deleteFile,
+  renameFolder,
+  updateFileURLs,
+  getFile,
 };
