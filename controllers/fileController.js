@@ -1,11 +1,25 @@
 const auth = require("../auth");
 const { body, validationResult } = require("express-validator");
-const { createFolder, uploadFile, getFiles, isUnique, deleteFolder, deleteFile } = require("../db/queries");
+const {
+  createFolder,
+  uploadFile,
+  getFiles,
+  isUnique,
+  deleteFolder,
+  deleteFile,
+  updateFileURLs,
+  renameFolder,
+  getFile,
+} = require("../db/queries");
 
 require("dotenv").config();
 const { createClient } = require("@supabase/supabase-js");
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_BYPASS);
 
+//Bucket name I am using from supabase
+const supabaseURLPath = `file-upload-project`;
+
+//Basic validation
 const validateFolderName = [
   body("name")
     .trim()
@@ -58,6 +72,25 @@ const getFileUpload = (req, res, next) => {
   res.render("fileUploadView", { title: "File Upload", data: {}, folderName: folderName });
 };
 
+const getFileDetails = async (req, res, next) => {
+  const fileData = await getFile(req.params.folderName, req.session.passport.user, req.params.filename);
+  console.log(fileData);
+  res.render("fileDetails", { title: "File Details", fileData: fileData });
+};
+
+const getDownloadFile = async (req, res, next) => {
+  //path for supabase
+  const path = `${req.session.passport.user}/${req.params.folderName}/${req.params.fileName}`;
+  const { data, error } = await supabase.storage.from(supabaseURLPath).download(path);
+  //setting header for file download
+  res.setHeader("Content-Disposition", `attachment; filename="${req.params.fileName}"`);
+
+  //convert blob to buffer and send
+  const arrayBuffer = await data.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+  res.send(buffer);
+};
+
 const postFileUpload = async (req, res, next) => {
   const userID = req.session.passport.user;
   const folderName = req.params.folderName;
@@ -65,7 +98,8 @@ const postFileUpload = async (req, res, next) => {
   const fileSize = req.file.size;
   const supabasePath = `${userID}/${folderName}/${fileName}`;
   const URL = `${process.env.SUPABASE_FILE_URL}/${supabasePath}`;
-  const { data, error } = await supabase.storage.from(`file-upload-project`).upload(supabasePath, req.file.buffer, {
+  //upload to supabase, allow file rewrite
+  const { data, error } = await supabase.storage.from(supabaseURLPath).upload(supabasePath, req.file.buffer, {
     upsert: true,
     contentType: req.file.mimetype,
   });
@@ -75,18 +109,64 @@ const postFileUpload = async (req, res, next) => {
   res.redirect("../");
 };
 
+const postRenameFolder = [
+  validateFolderName,
+  async (req, res, next) => {
+    const errors = validationResult(req);
+    const folderName = req.params.folderName;
+    const newFolderName = req.body.name;
+    const userID = req.session.passport.user;
+    const files = await getFiles(folderName, userID);
+    if (!errors.isEmpty()) {
+      return res.status(400).render("folderView", {
+        title: folderName,
+        folderName: folderName,
+        files: files,
+        errors: errors.array(),
+      });
+    }
+
+    //to rename a "folder" in supabase we need to go through each file in the folder and move the file
+    //first rename folder
+    await renameFolder(folderName, newFolderName, userID);
+    files.forEach(async (file) => {
+      //get old and new URLs and supabase paths
+      let newURL = file.url.split("/");
+      let fileName = newURL.pop();
+      newURL.pop();
+      newURL = newURL.join("/") + `/${newFolderName}/${fileName}`;
+      let supabaseCurrentPath = file.url.split("/");
+      supabaseCurrentPath = supabaseCurrentPath.slice(-3).join("/");
+      let supabaseNewPath = newURL.split("/");
+      supabaseNewPath = supabaseNewPath.slice(-3).join("/");
+
+      await supabase.storage.from(supabaseURLPath).move(supabaseCurrentPath, supabaseNewPath);
+      await updateFileURLs(newFolderName, userID, fileName, newURL);
+    });
+
+    await res.redirect("/");
+  },
+];
+
 const postDeleteFolder = async (req, res, next) => {
-  const user = req.session.passport.user;
+  const userID = req.session.passport.user;
   const folderName = req.params.folderName;
-  // console.log("Deleting Folder");
-  // console.log(user);
-  // console.log(folderName);
-  await deleteFolder(folderName, user);
+  //to delete "folders" in supabase we need to list all files and delete each file
+  const { data, error } = await supabase.storage.from(supabaseURLPath).list(`${userID}/${folderName}`);
+  let paths = [];
+  data.forEach((file) => {
+    let path = `${userID}/${folderName}/${file.name}`;
+    paths.push(path);
+  });
+  await supabase.storage.from(supabaseURLPath).remove(paths);
+  await deleteFolder(folderName, userID);
   res.redirect("/");
 };
 
 const postDeleteFile = async (req, res, next) => {
   const fileID = parseInt(req.params.id);
+  const path = `${req.session.passport.user}/${req.params.folderName}/${req.params.fileName}`;
+  await supabase.storage.from(supabaseURLPath).remove(path);
   await deleteFile(fileID);
   res.redirect(req.get("referer"));
 };
@@ -99,4 +179,7 @@ module.exports = {
   postFileUpload,
   postDeleteFolder,
   postDeleteFile,
+  getDownloadFile,
+  postRenameFolder,
+  getFileDetails,
 };
