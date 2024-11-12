@@ -188,6 +188,29 @@ async function getFile(folderName, userID, fileName) {
   return file;
 }
 
+async function renameFile(fileID, fileName) {
+  const file = await prisma.file.findUnique({
+    where: {
+      id: fileID,
+    },
+  });
+
+  const ext = file.name.split(".")[1];
+  let originalURL = file.url.split("/");
+  originalURL.pop();
+  originalURL = originalURL.join("/") + `/${fileName}.${ext}`;
+  console.log(originalURL);
+  const renameFile = await prisma.file.update({
+    where: {
+      id: fileID,
+    },
+    data: {
+      name: `${fileName}.${ext}`,
+      url: originalURL,
+    },
+  });
+}
+
 module.exports = {
   getUser,
   getUserById,
@@ -204,4 +227,5 @@ module.exports = {
   renameFolder,
   updateFileURLs,
   getFile,
+  renameFile,
 };
