@@ -7,6 +7,14 @@
     <title><%= title %></title>
   </head>
   <body>
-    <h1><%= title %></h1>
+    <h1><%= title %> for <%= fileData.name %></h1>
+    <%- include("partials/errors.ejs") %>
+    <p>Name:<%= fileData.name %><br />Size: <%= fileData.size %><br />Uploaded At: <%= fileData.uploaded_at %></p>
+
+    <form action="/folder/<%= folderName %>/<%= fileData.name %>/renameID/<%= fileData.id %>" method="POST">
+      <label for="name">Rename File: </label>
+      <input id="name" name="name" type="text" required />
+      <button>Rename</button>
+    </form>
   </body>
 </html>
