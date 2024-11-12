@@ -10,6 +10,7 @@ const {
   updateFileURLs,
   renameFolder,
   getFile,
+  renameFile,
 } = require("../db/queries");
 
 require("dotenv").config();
@@ -73,9 +74,11 @@ const getFileUpload = (req, res, next) => {
 };
 
 const getFileDetails = async (req, res, next) => {
-  const fileData = await getFile(req.params.folderName, req.session.passport.user, req.params.filename);
+  console.log("here");
+  console.log(req.params.fileName);
+  const fileData = await getFile(req.params.folderName, req.session.passport.user, req.params.fileName);
   console.log(fileData);
-  res.render("fileDetails", { title: "File Details", fileData: fileData });
+  res.render("fileDetails", { title: "File Details", fileData: fileData, folderName: req.params.folderName });
 };
 
 const getDownloadFile = async (req, res, next) => {
@@ -106,7 +109,7 @@ const postFileUpload = async (req, res, next) => {
   if (!error) {
     uploadFile(userID, folderName, fileName, URL, fileSize);
   }
-  res.redirect("../");
+  await res.redirect("../");
 };
 
 const postRenameFolder = [
@@ -171,6 +174,23 @@ const postDeleteFile = async (req, res, next) => {
   res.redirect(req.get("referer"));
 };
 
+const postRenameFile = async (req, res, next) => {
+  const userID = req.session.passport.user;
+  const fileID = parseInt(req.params.fileID);
+  const folderName = req.params.folderName;
+  const fileName = req.params.fileName;
+  const newFileName = req.body.name;
+  const ext = fileName.split(".")[1];
+  const originalURL = `${userID}/${folderName}/${fileName}`;
+  const newURL = `${userID}/${folderName}/${newFileName}.${ext}`;
+
+  renameFile(fileID, newFileName);
+
+  await supabase.storage.from(supabaseURLPath).move(originalURL, newURL);
+
+  await res.redirect("../../");
+};
+
 module.exports = {
   getFileUpload,
   getCreateFolder,
@@ -182,4 +202,5 @@ module.exports = {
   getDownloadFile,
   postRenameFolder,
   getFileDetails,
+  postRenameFile,
 };
