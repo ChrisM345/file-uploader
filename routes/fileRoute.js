@@ -17,6 +17,7 @@ router.get("/:folderName/uploadFile", controller.getFileUpload);
 router.post("/:folderName/delete", controller.postDeleteFolder);
 router.post("/:folderName/:fileName/id/:id/delete", controller.postDeleteFile);
 router.get("/:folderName/:fileName", controller.getFileDetails);
-router.get("/:folderName/:fileName", controller.getDownloadFile);
+router.get("/:folderName/:fileName/download", controller.getDownloadFile);
+router.post("/:folderName/:fileName/renameID/:fileID", controller.postRenameFile);
 
 module.exports = router;
