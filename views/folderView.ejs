@@ -23,6 +23,9 @@
       <% files.forEach((file) => { %>
       <div class="file">
         <a href="/folder/<%= folderName %>/<%= file.name %>"><%= file.name %></a>
+        <form action="/folder/<%= folderName %>/<%= file.name %>/download">
+          <input type="submit" value="Download File" />
+        </form>
         <form action="/folder/<%= folderName %>/<%= file.name %>/id/<%= file.id %>/delete" method="post">
           <input
             type="submit"
