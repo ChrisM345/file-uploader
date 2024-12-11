@@ -8,7 +8,7 @@
   </head>
   <body>
     <h1><%= title %></h1>
-    <div class="secretForm">
+    <div class="createFolderForm">
       <%- include("partials/errors.ejs") %>
       <form action="/folder/createFolder/" method="POST">
         <label for="name">Folder Name: </label>
@@ -16,5 +16,6 @@
         <button>Create Folder</button>
       </form>
     </div>
+    <a href="..\">Back</a>
   </body>
 </html>

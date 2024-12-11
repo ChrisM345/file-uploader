@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><%= title %></title>
+    <link rel="stylesheet" href="/css/styles.css" />
   </head>
   <body>
     <h1><%= title %></h1>
@@ -20,6 +21,8 @@
       <div class="folder">
         <a href="/folder/<%= folder.name %>"><img src="folderIcon.svg" /></a>
         <%= folder.name %>
+        <br />
+        <br />
         <form action="/folder/<%= folder.name %>/delete" method="post">
           <input
             type="submit"
@@ -27,12 +30,16 @@
             onclick="return confirm('Are you sure? All files in <%= folder.name %> will also be deleted')"
           />
         </form>
-        <%}) %>
       </div>
+      <%}) %>
     </div>
-    <ul>
-      <li><a href="/folder/createFolder">Create Folder</a></li>
-    </ul>
+
+    <div class="test">
+      <ul>
+        <li><a href="/folder/createFolder">Create Folder</a></li>
+      </ul>
+    </div>
+
     <%} else { %>
     <ul>
       <li><a href="/login">Login</a></li>

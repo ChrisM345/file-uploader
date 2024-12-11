@@ -74,10 +74,7 @@ const getFileUpload = (req, res, next) => {
 };
 
 const getFileDetails = async (req, res, next) => {
-  console.log("here");
-  console.log(req.params.fileName);
   const fileData = await getFile(req.params.folderName, req.session.passport.user, req.params.fileName);
-  console.log(fileData);
   res.render("fileDetails", { title: "File Details", fileData: fileData, folderName: req.params.folderName });
 };
 

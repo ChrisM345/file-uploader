@@ -88,7 +88,6 @@ async function isUnique(folderName, userID) {
 
 async function uploadFile(userID, folderName, fileName, URL, fileSize) {
   const folderID = await getFolderID(folderName, userID);
-  console.log(folderID);
   const uploadFile = await prisma.file.create({
     data: {
       name: fileName,
@@ -111,7 +110,6 @@ async function getFiles(folderName, userID) {
     },
   });
 
-  // console.log(files);
   return files;
 }
 
@@ -199,7 +197,6 @@ async function renameFile(fileID, fileName) {
   let originalURL = file.url.split("/");
   originalURL.pop();
   originalURL = originalURL.join("/") + `/${fileName}.${ext}`;
-  console.log(originalURL);
   const renameFile = await prisma.file.update({
     where: {
       id: fileID,
